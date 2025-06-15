@@ -1,25 +1,15 @@
-use crate::config::GLOBAL_CONFIG;
-use crate::docker::docker_models::DockerSupportedLanguage;
+use crate::config_service::GLOBAL_CONFIG;
+use crate::models::docker_models::DockerSupportedLanguage;
 use crate::proto::executor::ExecuteRequest;
-use crate::session_management_service::{SessionError, SessionManagement};
-use tonic::Request;
-use std::fmt;
+use crate::models::session_management_models::{SessionError};
+use crate::session_management_service::SessionManagement;
+use crate::models::validation_models::{ValidationService, ValidRequest, ValidationError};
+
 use std::error::Error;
+use std::fmt;
+use tonic::Request;
 
-#[derive(Debug)]
-pub enum ValidationError {
-    InvalidLanguage(String),
-    EmptyCode(),
-    EmptyLanguage(),
-    SessionIdError(String),
-    InvalidCode(String),
-}
 
-pub struct ValidRequest {
-    session_id: String,
-    code: String,
-    language: String,
-}
 impl ValidRequest {
     pub fn new(id: String, code: String, language: String) -> Self {
         ValidRequest {
@@ -40,7 +30,6 @@ impl ValidRequest {
         &self.language
     }
 }
-
 
 impl fmt::Display for ValidationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -63,7 +52,6 @@ impl ValidationError {
     }
 }
 
-pub struct ValidationService;
 
 impl ValidationService {
     pub async fn validate_request(
@@ -92,12 +80,15 @@ impl ValidationService {
         if language.is_empty() {
             return Err(ValidationError::EmptyLanguage());
         }
-        let docker_language =DockerSupportedLanguage::is_supported(&language);
+        let docker_language = DockerSupportedLanguage::is_supported(&language);
 
         if docker_language.is_none() {
             return Err(ValidationError::InvalidLanguage(format!("{:?}", language)));
         } else {
-            println!("Language is valid: {}", DockerSupportedLanguage::to_string(&docker_language.unwrap()));
+            println!(
+                "Language is valid: {}",
+                DockerSupportedLanguage::to_string(&docker_language.unwrap())
+            );
         }
 
         if code.is_empty() {

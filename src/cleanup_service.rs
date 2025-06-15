@@ -1,44 +1,16 @@
-use crate::config::GLOBAL_CONFIG;
+use crate::config_service::GLOBAL_CONFIG;
 use bollard::Docker;
 use bollard::container::RemoveContainerOptions;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use crate::models::cleanup_models::{ActivityType,CleanupService};
 
 pub const CLEANUP_ACTIVITY_CONTAINER: &str = "container";
 // pub const CLEANUP_ACTIVITY_IMAGE: &str = "image";
 pub const CLEANUP_ACTIVITY_ALL_TARS: &str = "all tars";
 // pub const CLEANUP_ACTIVITY_TAR: &str = "tar";
 
-#[derive(Debug, Default)]
-
-pub struct ActivityType {
-    pub container: Option<String>,
-    pub image: Option<String>,
-    pub all_tars: Option<String>,
-    pub tar: Option<String>,
-    pub ports: Option<Vec<u16>>,
-}
-
-impl ActivityType {
-    pub fn new(
-        container: Option<String>,
-        image: Option<String>,
-        all_tars: Option<String>,
-        tar: Option<String>,
-        ports: Option<Vec<u16>>,
-    ) -> Self {
-        ActivityType {
-            container,
-            image,
-            all_tars,
-            tar,
-            ports,
-        }
-    }
-}
-
-pub struct CleanupService;
 
 impl CleanupService {
     pub async fn cleanup(&self, activity: ActivityType) -> Result<(), Box<dyn std::error::Error>> {
@@ -60,7 +32,7 @@ impl CleanupService {
             Self::cleanup_single_tar(tar_path).await?;
         }
         if let Some(ports) = activity.ports {
-            println!("Cleaning up ports...");
+            println!("Cleaning up ports...{:?}", ports);
             Self::cleanup_ports(ports).await;
         }
         if activity.container.is_none()
@@ -134,7 +106,7 @@ impl CleanupService {
         Ok(())
     }
 
-    async fn cleanup_ports(ports: Vec<u16>) {
+    async fn cleanup_ports(ports: Vec<i32>) {
         let ports_arg = ports
             .iter()
             .map(|port| port.to_string())
@@ -153,5 +125,7 @@ impl CleanupService {
             eprintln!("kill_ports.sh execution failed.");
             eprintln!("Error: {}", String::from_utf8_lossy(&output.stderr));
         }
+
+        println!("Ports cleaned up: {:?}", ports);
     }
 }

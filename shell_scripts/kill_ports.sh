@@ -1,6 +1,6 @@
 #!/bin/bash
 SHELL_SCRIPTS_PATH="./shell_scripts"
-
+echo "Using shell scripts path: $SHELL_SCRIPTS_PATH"
 # Get the ports from get_config.sh
 CONFIG_PORTS=($($SHELL_SCRIPTS_PATH/get_config.sh))
 
@@ -13,6 +13,7 @@ if [ "${#PORTS[@]}" -eq 0 ]; then
 fi
 # Loop through the ports and check if they are in use
 for PORT in "${PORTS[@]}"; do
+    echo "Checking port: $PORT"
     if [ -z "$PORT" ]; then
         continue
     fi

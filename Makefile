@@ -26,7 +26,8 @@ grpcui:
 	$(eval PORTS=$(shell $(SHELL_SCRIPTS_PATH)/get_config.sh))
 	$(eval SERVICE_PORT=$(word 1, $(PORTS)))
 	$(eval GRPC_UI_PORT=$(word 2, $(PORTS)))
-	@echo "Starting grpcui on GRPC_UI_PORT=$(GRPC_UI_PORT) and SERVICE_PORT=$(SERVICE_PORT)"
+	$(eval WEBSOCKET_PORT=$(word 3, $(PORTS)))
+	@echo "Starting grpcui on GRPC_UI_PORT=$(GRPC_UI_PORT) and SERVICE_PORT=$(SERVICE_PORT) AND WEBSOCKET_PORT=$(WEBSOCKET_PORT)"
 	grpcui -plaintext -port $(GRPC_UI_PORT) localhost:$(SERVICE_PORT)
 
 all: fmt build test
